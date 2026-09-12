@@ -3,10 +3,14 @@ package io.github.rhythmcache.dioxamine.adb.builtin
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DevicesOther
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Terminal
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -60,12 +64,10 @@ fun BuiltInActionsTab(vm: AdbViewModel) {
         BuiltInSubScreen.TilesList -> {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp),
+                contentPadding = PaddingValues(start = 14.dp, end = 14.dp, top = 12.dp, bottom = 28.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                item {
-                    ToolsDashboardHeader(isConnected)
-                }
+                item { PremiumDeviceDashboardHeader(isConnected) }
 
                 if (!isConnected) {
                     item {
@@ -90,9 +92,7 @@ fun BuiltInActionsTab(vm: AdbViewModel) {
                     }
                 }
 
-                item {
-                    ToolsSectionLabel("DEVICE")
-                }
+                item { ToolsSectionLabel("DEVICE") }
                 item {
                     DeviceInformationTile(
                         vm = vm,
@@ -101,9 +101,7 @@ fun BuiltInActionsTab(vm: AdbViewModel) {
                     )
                 }
 
-                item {
-                    ToolsSectionLabel("CONTROL")
-                }
+                item { ToolsSectionLabel("CONTROL") }
                 item {
                     RemoteControlTile(
                         isConnected = isConnected,
@@ -123,9 +121,7 @@ fun BuiltInActionsTab(vm: AdbViewModel) {
                     )
                 }
 
-                item {
-                    ToolsSectionLabel("MANAGEMENT")
-                }
+                item { ToolsSectionLabel("MANAGEMENT") }
                 item {
                     FileManagerTile(
                         isConnected = isConnected,
@@ -145,9 +141,7 @@ fun BuiltInActionsTab(vm: AdbViewModel) {
                     )
                 }
 
-                item {
-                    ToolsSectionLabel("SYSTEM")
-                }
+                item { ToolsSectionLabel("SYSTEM") }
                 item {
                     MiscTile(
                         isConnected = isConnected,
@@ -175,54 +169,149 @@ fun BuiltInActionsTab(vm: AdbViewModel) {
 }
 
 @Composable
-private fun ToolsDashboardHeader(isConnected: Boolean) {
-    Surface(
+private fun PremiumDeviceDashboardHeader(isConnected: Boolean) {
+    Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceContainer
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Column(Modifier.padding(18.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(
+                    modifier = Modifier.size(50.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            Icons.Filled.Build,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
+                Spacer(Modifier.width(13.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        "ADB Command Center",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        "Premium Android device-control dashboard",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = if (isConnected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            if (isConnected) Icons.Filled.CheckCircle else Icons.Filled.DevicesOther,
+                            contentDescription = null,
+                            modifier = Modifier.size(15.dp),
+                            tint = if (isConnected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.width(5.dp))
+                        Text(
+                            if (isConnected) "ONLINE" else "READY",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                DashboardMetric(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Filled.DevicesOther,
+                    label = "ADB",
+                    value = if (isConnected) "ACTIVE" else "WAIT"
+                )
+                DashboardMetric(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Filled.Terminal,
+                    label = "TOOLS",
+                    value = "10"
+                )
+                DashboardMetric(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Filled.Security,
+                    label = "ACCESS",
+                    value = "READY"
+                )
+            }
+
+            Spacer(Modifier.height(12.dp))
             Surface(
-                modifier = Modifier.size(46.dp),
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
-                color = MaterialTheme.colorScheme.primaryContainer
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
             ) {
-                Box(contentAlignment = Alignment.Center) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Icon(
-                        Icons.Filled.Build,
+                        if (isConnected) Icons.Filled.Bolt else Icons.Filled.DevicesOther,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        modifier = Modifier.size(17.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        if (isConnected) "Device connected • tools are ready to use" else "Connect an Android device via USB or wireless ADB",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
-            Spacer(Modifier.width(13.dp))
-            Column(Modifier.weight(1f)) {
+        }
+    }
+}
+
+@Composable
+private fun DashboardMetric(
+    modifier: Modifier,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    value: String
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.62f)
+    ) {
+        Column(Modifier.padding(horizontal = 11.dp, vertical = 10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(15.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(Modifier.width(6.dp))
                 Text(
-                    "ADB Toolset",
-                    style = MaterialTheme.typography.titleMedium,
+                    label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Bold
                 )
-                Text(
-                    if (isConnected) "Ready to manage your device" else "Connect a device to get started",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
-            Surface(
-                shape = RoundedCornerShape(50),
-                color = if (isConnected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
-            ) {
-                Text(
-                    if (isConnected) "READY" else "OFFLINE",
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = if (isConnected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            Spacer(Modifier.height(2.dp))
+            Text(
+                value,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
@@ -240,6 +329,9 @@ private fun ToolsSectionLabel(label: String) {
             color = MaterialTheme.colorScheme.primary
         )
         Spacer(Modifier.width(8.dp))
-        HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f))
+        HorizontalDivider(
+            modifier = Modifier.weight(1f),
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)
+        )
     }
 }
