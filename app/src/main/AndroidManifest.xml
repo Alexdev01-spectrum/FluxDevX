@@ -7,9 +7,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-    <uses-feature
-        android:name="android.hardware.usb.host"
-        android:required="false" />
+    <uses-feature android:name="android.hardware.usb.host" android:required="false" />
 
     <application
         android:name=".DioxamineApplication"
@@ -19,7 +17,7 @@
         android:localeConfig="@xml/locales_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Dioxamine">
+        android:theme="@style/Theme.FluxDevX">
 
         <activity
             android:name=".MainActivity"
@@ -41,9 +39,7 @@
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
             android:enabled="false"
             android:exported="false">
-            <meta-data
-                android:name="autoStoreLocales"
-                android:value="true" />
+            <meta-data android:name="autoStoreLocales" android:value="true" />
         </service>
 
         <provider
@@ -57,5 +53,4 @@
         </provider>
 
     </application>
-
 </manifest>
