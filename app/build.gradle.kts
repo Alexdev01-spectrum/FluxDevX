@@ -261,7 +261,18 @@ val buildDxlsNative = tasks.register("buildDxlsNative") {
         abis.forEach { abi ->
             val clang = clangBin.resolve(if (isWindows()) "clang.exe" else "clang")
             val output = outDir.resolve("dxls-${abi.name}")
-            execOps.exec { spec -> spec.executable = clang.absolutePath; spec.args = listOf("--target=${abi.triple}", "-O2", "-fPIE", "-pie", cFile.absolutePath, "-o", output.absolutePath) }
+            execOps.exec {
+                executable = clang.absolutePath
+                args = listOf(
+                    "--target=${abi.triple}",
+                    "-O2",
+                    "-fPIE",
+                    "-pie",
+                    cFile.absolutePath,
+                    "-o",
+                    output.absolutePath
+                )
+            }
             logger.lifecycle("${abi.name} dxls built")
         }
     }
