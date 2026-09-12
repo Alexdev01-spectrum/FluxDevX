@@ -38,12 +38,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.os.LocaleListCompat
 import io.github.rhythmcache.dioxamine.BuildConfig
@@ -1005,67 +1003,43 @@ fun SettingsScreen(vm: AdbViewModel) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
+                            .padding(20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = "DI",
-                                style = MaterialTheme.typography.headlineMedium.copy(letterSpacing = 3.sp),
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(Modifier.width(4.dp))
-                            Text(
-                                text = "\u232C",
-                                fontSize = 25.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(Modifier.width(4.dp))
-                            Text(
-                                text = "XAMINE",
-                                style = MaterialTheme.typography.headlineMedium.copy(letterSpacing = 3.sp),
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
+                        Text(
+                            text = "FluxDevX",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
 
                         Spacer(Modifier.height(8.dp))
 
                         Text(
-                            text = "© ${BuildConfig.COPYRIGHT_YEAR} ${BuildConfig.AUTHOR}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            text = "Developed by Alex",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+
+                        Spacer(Modifier.height(4.dp))
+
+                        Text(
+                            text = "@alexdevyuhhh",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.clickable {
+                                openUrl("https://t.me/alexdevyuhhh")
+                            }
                         )
 
                         Spacer(Modifier.height(12.dp))
 
-                        Row(
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            IconButton(onClick = { openUrl(BuildConfig.GITHUB_URL) }) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_gh),
-                                    contentDescription = stringResource(R.string.cd_github),
-                                    modifier = Modifier.size(24.dp),
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                            Spacer(Modifier.width(16.dp))
-                            IconButton(onClick = { openUrl(BuildConfig.TELEGRAM_URL) }) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_tg),
-                                    contentDescription = stringResource(R.string.cd_telegram),
-                                    modifier = Modifier.size(24.dp),
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        }
+                        Text(
+                            text = "Telegram",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
 
                         Spacer(Modifier.height(12.dp))
 
@@ -1073,30 +1047,6 @@ fun SettingsScreen(vm: AdbViewModel) {
                             text = stringResource(R.string.settings_about_version, BuildConfig.VERSION_NAME),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
-                        Spacer(Modifier.height(8.dp))
-
-                        Text(
-                            text = stringResource(R.string.settings_about_documentation),
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                textDecoration = TextDecoration.Underline
-                            ),
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.clickable { openUrl(BuildConfig.DOCUMENTATION_URL) }
-                        )
-
-                        Spacer(Modifier.height(8.dp))
-
-                        Text(
-                            text = stringResource(R.string.settings_about_source_code),
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                textDecoration = TextDecoration.Underline
-                            ),
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.clickable { openUrl(BuildConfig.SOURCE_CODE_URL) }
                         )
                     }
                 }
