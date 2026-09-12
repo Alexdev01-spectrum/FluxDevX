@@ -10,14 +10,19 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.automirrored.filled.ScreenShare
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -28,15 +33,10 @@ import io.github.rhythmcache.dioxamine.fastboot.FastbootViewModel
 import io.github.rhythmcache.dioxamine.fastboot.ListenForFastbootDevices
 import io.github.rhythmcache.dioxamine.scrcpy.ScrcpyScreen
 import io.github.rhythmcache.dioxamine.settings.SettingsScreen
-import io.github.rhythmcache.adb.AdbDeviceMode
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import java.io.File
-
-// ---------------------------------------------------------------------------
-// Navigation
-// ---------------------------------------------------------------------------
 
 enum class Tab(@StringRes val labelRes: Int, val icon: androidx.compose.ui.graphics.vector.ImageVector) {
     ADB(R.string.tab_adb, Icons.Filled.PhoneAndroid),
@@ -65,18 +65,13 @@ class MainActivity : AppCompatActivity() {
                         .getOrDefault(AppTheme.SYSTEM)
                 )
             }
-
-            var currentUseMonet by remember {
-                mutableStateOf(prefsState.getBoolean("use_monet", false))
-            }
+            var currentUseMonet by remember { mutableStateOf(prefsState.getBoolean("use_monet", false)) }
 
             DisposableEffect(Unit) {
                 val listener = SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
-                    if (key == "theme_mode") {
-                        currentAppTheme = runCatching { AppTheme.valueOf(prefs.getString("theme_mode", "SYSTEM") ?: "SYSTEM") }
-                            .getOrDefault(AppTheme.SYSTEM)
-                    } else if (key == "use_monet") {
-                        currentUseMonet = prefs.getBoolean("use_monet", false)
+                    when (key) {
+                        "theme_mode" -> currentAppTheme = runCatching { AppTheme.valueOf(prefs.getString("theme_mode", "SYSTEM") ?: "SYSTEM") }.getOrDefault(AppTheme.SYSTEM)
+                        "use_monet" -> currentUseMonet = prefs.getBoolean("use_monet", false)
                     }
                 }
                 prefsState.registerOnSharedPreferenceChangeListener(listener)
@@ -84,24 +79,21 @@ class MainActivity : AppCompatActivity() {
             }
 
             DioxamineTheme(appTheme = currentAppTheme, useMonet = currentUseMonet) {
-                DioxamineApp(keyDir = filesDir)
+                FluxDevXApp(keyDir = filesDir)
             }
         }
     }
 }
 
 @Composable
-fun DioxamineApp(keyDir: File) {
+fun FluxDevXApp(keyDir: File) {
     val context = LocalContext.current
     var selectedTab by remember { mutableStateOf(Tab.ADB) }
     val vm: AdbViewModel = viewModel(factory = object : androidx.lifecycle.ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return AdbViewModel(keyDir) as T
-        }
+        override fun <T : ViewModel> create(modelClass: Class<T>): T = AdbViewModel(keyDir) as T
     })
     val fastbootVm: FastbootViewModel = viewModel()
-
     val coroutineScope = rememberCoroutineScope()
     val pluginRepo = remember { io.github.rhythmcache.dioxamine.plugin.PluginRepository(context.applicationContext, coroutineScope) }
     val permissionStore = remember { io.github.rhythmcache.dioxamine.plugin.PluginPermissionStore(context.applicationContext) }
@@ -112,13 +104,11 @@ fun DioxamineApp(keyDir: File) {
     io.github.rhythmcache.dioxamine.plugin.PluginPermissionDialogHost(permissionGate)
     io.github.rhythmcache.dioxamine.plugin.PluginDialogHost(dialogGate)
     io.github.rhythmcache.dioxamine.plugin.PluginSafLauncherHost(safBridge)
-
     ListenForUsbDevices(vm)
     ListenForFastbootDevices(fastbootVm)
 
     val adbConnectedCount = vm.devices.values.count { it.state is ConnectionState.Connected }
     val fastbootConnectedCount = if (fastbootVm.isConnected) 1 else fastbootVm.devices.size
-
     LaunchedEffect(adbConnectedCount, fastbootConnectedCount) {
         DioxForegroundService.updateDeviceCounts(context, adbConnectedCount, fastbootConnectedCount)
     }
@@ -134,36 +124,44 @@ fun DioxamineApp(keyDir: File) {
             if (isScrcpyFullScreen) {
                 controller.hide(WindowInsetsCompat.Type.systemBars())
                 controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            } else {
-                controller.show(WindowInsetsCompat.Type.systemBars())
-            }
+            } else controller.show(WindowInsetsCompat.Type.systemBars())
         }
         onDispose {
-            val activityOnDispose = context as? ComponentActivity
-            val windowOnDispose = activityOnDispose?.window
-            if (windowOnDispose != null) {
-                WindowCompat.getInsetsController(windowOnDispose, windowOnDispose.decorView)
-                .show(WindowInsetsCompat.Type.systemBars())
-            }
+            (context as? ComponentActivity)?.window?.let { WindowCompat.getInsetsController(it, it.decorView).show(WindowInsetsCompat.Type.systemBars()) }
         }
     }
 
     val hideBottomBar = isScrcpyFullScreen || isPluginActive
-
-    // Navigate back to ADB home tab before exiting app
-    BackHandler(enabled = selectedTab != Tab.ADB && !hideBottomBar) {
-        selectedTab = Tab.ADB
-    }
-
-    // Exit Scrcpy fullscreen on back gesture
-    BackHandler(enabled = isScrcpyFullScreen) {
-        isScrcpyFullScreen = false
-    }
+    BackHandler(enabled = selectedTab != Tab.ADB && !hideBottomBar) { selectedTab = Tab.ADB }
+    BackHandler(enabled = isScrcpyFullScreen) { isScrcpyFullScreen = false }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            if (!hideBottomBar) {
+                Surface(tonalElevation = 2.dp, shadowElevation = 4.dp) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 20.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("FluxDevX", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold))
+                            Text("Advanced mobile device toolkit", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+                        }
+                        Surface(shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.primaryContainer) {
+                            Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Filled.Bolt, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
+                                Spacer(Modifier.width(6.dp))
+                                Text("Ready", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                            }
+                        }
+                    }
+                }
+            }
+        },
         bottomBar = {
             if (!hideBottomBar) {
-                NavigationBar {
+                NavigationBar(tonalElevation = 8.dp) {
                     Tab.entries.forEach { tab ->
                         NavigationBarItem(
                             selected = selectedTab == tab,
@@ -177,8 +175,7 @@ fun DioxamineApp(keyDir: File) {
         }
     ) { padding ->
         Box(
-            modifier = if (hideBottomBar) Modifier.fillMaxSize()
-                       else Modifier.padding(padding).fillMaxSize()
+            modifier = if (hideBottomBar) Modifier.fillMaxSize() else Modifier.padding(padding).fillMaxSize()
         ) {
             when (selectedTab) {
                 Tab.ADB -> AdbScreen(vm, pluginRepo, permissionGate, dialogGate, safBridge, onPluginActiveChange = { isPluginActive = it })
