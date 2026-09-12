@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.BackHandler
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
@@ -139,10 +139,10 @@ fun FluxDevXApp(keyDir: File) {
                 Tab.ADB -> Column(Modifier.fillMaxSize()) {
                     FluxDevXConnectionCard(adbCount, fastbootCount)
                     Box(Modifier.fillMaxWidth().weight(1f)) {
-                        AdbScreen(vm, pluginRepo, permissionGate, dialogGate, safBridge) { pluginActive = it }
+                        AdbScreen(vm, pluginRepo, permissionGate, dialogGate, safBridge, onPluginActiveChange = { pluginActive = it })
                     }
                 }
-                Tab.SCRCPY -> ScrcpyScreen(vm) { scrcpyFullscreen = it }
+                Tab.SCRCPY -> ScrcpyScreen(vm, onFullScreenChange = { scrcpyFullscreen = it })
                 Tab.FASTBOOT -> FastbootScreen(fastbootVm)
                 Tab.SETTINGS -> SettingsScreen(vm)
             }
@@ -171,17 +171,22 @@ private fun FluxDevXTopBar(adbCount: Int, fastbootCount: Int) {
             }
             Spacer(Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FluxDevXMetric(Icons.Filled.PhoneAndroid, "ADB", adbCount)
-                FluxDevXMetric(Icons.Filled.Bolt, "FASTBOOT", fastbootCount)
-                FluxDevXMetric(Icons.Filled.Security, "SECURE", 1)
+                FluxDevXMetric(Modifier.weight(1f), Icons.Filled.PhoneAndroid, "ADB", adbCount)
+                FluxDevXMetric(Modifier.weight(1f), Icons.Filled.Bolt, "FASTBOOT", fastbootCount)
+                FluxDevXMetric(Modifier.weight(1f), Icons.Filled.Security, "SECURE", 1)
             }
         }
     }
 }
 
 @Composable
-private fun FluxDevXMetric(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, value: Int) {
-    Surface(Modifier.weight(1f), shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)) {
+private fun FluxDevXMetric(
+    modifier: Modifier,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    value: Int
+) {
+    Surface(modifier, shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)) {
         Row(Modifier.padding(horizontal = 10.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(icon, contentDescription = null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
             Spacer(Modifier.width(7.dp))
